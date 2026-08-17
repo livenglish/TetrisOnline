@@ -1,23 +1,30 @@
 <!doctype html>
-<meta charset="utf-8">
-<title>Тетрис</title>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Неон Тетрис</title>
 <style>
-  body{margin:0;background:#111;color:white;font:20px sans-serif;text-align:center}canvas{margin:20px;border:2px solid #555;background:#000}
-</style>
-<h2>Тетрис — <span id="score">0</span></h2>
-<canvas id="game" width="240" height="400"></canvas>
-<p>← → двигать · ↑ вращать · ↓ ускорить · Enter заново</p>
-<script>
-const c=game.getContext('2d'),W=12,H=20,S=20,colors=['','#0ff','#ff0','#a0f','#0f0','#f00','#00f','#f80'];
-let a,p,x,y,n=0,over=false,last=0;
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:radial-gradient(circle at top,#28306c,#100a2b 55%,#05030e);color:#fff;font-family:system-ui,sans-serif;text-align:center}.app{padding:20px}h1{margin:0 0 14px;font-size:clamp(28px,6vw,48px);text-shadow:0 0 8px #ff42d0,0 0 24px #00eaff}.game{display:flex;gap:18px;align-items:flex-start;justify-content:center}.board{position:relative}canvas{display:block;background:#09071a;border:3px solid #55f6ff;border-radius:12px;box-shadow:0 0 12px #00eaff,0 0 35px #7a2cff}.side{width:150px;display:grid;gap:12px}.card{padding:12px;border:1px solid #ff62d5;border-radius:12px;background:#ffffff12;box-shadow:0 0 12px #ff3ec855}.label{font-size:13px;color:#aefaff;text-transform:uppercase}.value{font-size:28px;font-weight:900;text-shadow:0 0 8px #ff42d0}#next{margin:auto;border-width:1px;box-shadow:none}.buttons{display:flex;justify-content:center;gap:8px;margin-top:14px}.buttons button{width:52px;height:44px;border:0;border-radius:12px;background:linear-gradient(135deg,#00eaff,#b845ff);color:white;font-size:22px;font-weight:bold;box-shadow:0 0 12px #00eaff88;cursor:pointer}.help{margin:14px 0 0;color:#d7d5ff;font-size:14px}.overlay{position:absolute;inset:3px;display:none;place-items:center;border-radius:9px;background:#09071add;font-size:28px;font-weight:900;text-shadow:0 0 12px #ff42d0}.overlay.show{display:grid}@media(max-width:560px){.game{gap:10px}.side{width:105px}.card{padding:8px}.value{font-size:21px}#game{width:240px;height:480px}.help{max-width:360px}}
+</style></head><body><main class="app">
+<h1>✨ НЕОН ТЕТРИС ✨</h1><div class="game">
+<div class="board"><canvas id="game" width="300" height="600"></canvas><div id="overlay" class="overlay"></div></div>
+<aside class="side"><div class="card"><div class="label">Очки</div><div id="score" class="value">0</div></div><div class="card"><div class="label">Уровень</div><div id="level" class="value">1</div></div><div class="card"><div class="label">Линии</div><div id="lines" class="value">0</div></div><div class="card"><div class="label">Дальше</div><canvas id="next" width="100" height="100"></canvas></div></aside>
+</div><div class="buttons"><button data-k="ArrowLeft">←</button><button data-k="ArrowUp">↻</button><button data-k="ArrowRight">→</button><button data-k="ArrowDown">↓</button><button data-k=" ">⤓</button></div><p class="help">← → двигать · ↑ вращать · ↓ ускорить · пробел сбросить · P пауза · Enter новая игра</p>
+</main><script>
+const W=10,H=20,S=30,C=['','#21f7ff','#ffe14d','#c45cff','#54ff8c','#ff4d9d','#5271ff','#ff963b'];
 const shapes=[[[1,1,1,1]],[[2,2],[2,2]],[[0,3,0],[3,3,3]],[[0,4,4],[4,4,0]],[[5,5,0],[0,5,5]],[[6,0,0],[6,6,6]],[[0,0,7],[7,7,7]]];
-function reset(){a=Array.from({length:H},()=>Array(W).fill(0));n=0;over=false;spawn()}
-function spawn(){p=shapes[Math.random()*7|0].map(r=>[...r]);x=5;y=0;if(hit())over=true}
-function hit(){return p.some((r,j)=>r.some((v,i)=>v&&(a[y+j]?.[x+i]??1)))}
-function move(dx,dy){x+=dx;y+=dy;if(hit()){x-=dx;y-=dy;if(dy){p.forEach((r,j)=>r.forEach((v,i)=>v&&(a[y+j][x+i]=v)));a=a.filter(r=>{if(r.every(Boolean)){n+=10;return false}return true});while(a.length<H)a.unshift(Array(W).fill(0));spawn()}return false}return true}
-function turn(){let q=p;p=p[0].map((_,i)=>p.map(r=>r[i]).reverse());if(hit())p=q}
-function draw(){c.clearRect(0,0,240,400);[...a,...[]].forEach((r,j)=>r.forEach((v,i)=>box(v,i,j)));p.forEach((r,j)=>r.forEach((v,i)=>box(v,x+i,y+j)));score.textContent=n+(over?' — конец игры':'')}
-function box(v,i,j){if(v){c.fillStyle=colors[v];c.fillRect(i*S,j*S,S-1,S-1)}}
-onkeydown=e=>{if(e.key==='Enter')reset();if(over)return;if(e.key==='ArrowLeft')move(-1,0);if(e.key==='ArrowRight')move(1,0);if(e.key==='ArrowDown')move(0,1);if(e.key==='ArrowUp')turn();draw()};
-function loop(t){if(!over&&t-last>500){move(0,1);last=t}draw();requestAnimationFrame(loop)}reset();loop();
-</script>
+const game=document.querySelector('#game'),next=document.querySelector('#next'),ctx=game.getContext('2d'),preview=next.getContext('2d'),ui={score:document.querySelector('#score'),level:document.querySelector('#level'),lines:document.querySelector('#lines'),overlay:document.querySelector('#overlay')};
+let board,piece,nextPiece,x,y,points,totalLines,lvl,over,paused,last;
+const pick=()=>shapes[Math.random()*shapes.length|0].map(r=>[...r]);
+function reset(){board=Array.from({length:H},()=>Array(W).fill(0));points=totalLines=0;lvl=1;over=paused=false;nextPiece=pick();last=performance.now();spawn();update()}
+function spawn(){piece=nextPiece;nextPiece=pick();x=(W-piece[0].length>>1);y=0;if(hit())over=true}
+function hit(px=x,py=y,p=piece){return p.some((r,j)=>r.some((v,i)=>v&&(board[py+j]?.[px+i]??1)))}
+function drop(dx=0,dy=1){x+=dx;y+=dy;if(!hit())return true;x-=dx;y-=dy;if(dy){piece.forEach((r,j)=>r.forEach((v,i)=>v&&(board[y+j][x+i]=v)));clear();spawn()}return false}
+function clear(){let n=0;board=board.filter(r=>{if(r.every(Boolean)){n++;return false}return true});while(board.length<H)board.unshift(Array(W).fill(0));if(n){points+=[0,100,300,500,800][n]*lvl;totalLines+=n;lvl=1+(totalLines/10|0)}}
+function rotate(){const old=piece,oldX=x;piece=piece[0].map((_,i)=>piece.map(r=>r[i]).reverse());for(const n of [0,-1,1,-2,2]){x=oldX+n;if(!hit())return}piece=old;x=oldX}
+function hardDrop(){let n=0;while(drop(0,1))n++;points+=n*2}
+function block(c,v,i,j,size=S){if(!v)return;c.fillStyle=C[v];c.shadowColor=C[v];c.shadowBlur=12;c.fillRect(i*size+2,j*size+2,size-4,size-4);c.fillStyle='#ffffff66';c.fillRect(i*size+5,j*size+5,size-10,4);c.shadowBlur=0}
+function draw(){ctx.clearRect(0,0,game.width,game.height);ctx.strokeStyle='#35cfff18';for(let i=0;i<=W;i++){ctx.beginPath();ctx.moveTo(i*S,0);ctx.lineTo(i*S,H*S);ctx.stroke()}for(let j=0;j<=H;j++){ctx.beginPath();ctx.moveTo(0,j*S);ctx.lineTo(W*S,j*S);ctx.stroke()}board.forEach((r,j)=>r.forEach((v,i)=>block(ctx,v,i,j)));if(!over)piece.forEach((r,j)=>r.forEach((v,i)=>block(ctx,v,x+i,y+j)));preview.clearRect(0,0,100,100);const z=20,ox=(100-nextPiece[0].length*z)/2,oy=(100-nextPiece.length*z)/2;preview.save();preview.translate(ox,oy);nextPiece.forEach((r,j)=>r.forEach((v,i)=>block(preview,v,i,j,z)));preview.restore();ui.overlay.textContent=over?'Игра окончена 🎉':paused?'Пауза 😊':'';ui.overlay.classList.toggle('show',over||paused);update()}
+function update(){ui.score.textContent=points;ui.level.textContent=lvl;ui.lines.textContent=totalLines}
+function action(k){if(k==='Enter')return reset();if(k.toLowerCase()==='p'&&!over){paused=!paused;last=performance.now();return}if(over||paused)return;if(k==='ArrowLeft')drop(-1,0);if(k==='ArrowRight')drop(1,0);if(k==='ArrowDown'&&drop())points++;if(k==='ArrowUp')rotate();if(k===' ')hardDrop()}
+onkeydown=e=>{if(['ArrowLeft','ArrowRight','ArrowDown','ArrowUp',' '].includes(e.key))e.preventDefault();action(e.key);draw()};document.querySelectorAll('button').forEach(b=>b.onclick=()=>{action(b.dataset.k);draw()});
+function loop(t){if(!over&&!paused&&t-last>Math.max(90,700-(lvl-1)*55)){drop();last=t}draw();requestAnimationFrame(loop)}reset();requestAnimationFrame(loop);
+</script></body></html>
